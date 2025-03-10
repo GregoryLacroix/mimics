@@ -5,5 +5,87 @@
 {% endblock %}
 
 {% block body %}
+	<div
+		class="container">
+		{#     success, OBJET MESSAGE  #}
+		{% for label, messages in app.flashes(['success', 'danger']) %}
+			{# "La catégorie a été enregistrée." in OBJET MESSAGE   #}
 
+			{% for message in messages %}
+				{#          bg-success  #}
+				{#          bg-danger  #}
+					<div class="bg-{{ label }} text-white p-3 mb-3"> {{ message|raw }}
+				</div>
+			{% endfor %}
+		{% endfor %}
+
+		<div>
+			<h2 class="my-4 fs-3">Liste des catégories</h2>
+
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Titre</th>
+						<th>Description</th>
+						<th>Enregistré le</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for item in dbCategory %}
+						{# {{ dump(item) }} #}
+						<tr>
+							<td>{{ item.title }}</td>
+							<td>{{ item.description }}</td>
+							<td>{{ item.createdAt|date('d/m/Y à H:i:s') }}</td>
+							<td>
+								<a href="{{ path('app_admin_category_update', {'id': item.id}) }}" class="btn btn-dark mb-2">
+									<i class="fa-solid fa-pen-to-square"></i>
+								</a>
+								<button class="btn btn-danger js-modal-trigger" data-target="modal-js-example--{{ item.id }}">
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</td>
+						</tr>
+
+						<div id="modal-js-example-{{ item.id }}" class="modal">
+
+							<div class="modal-background"></div>
+							<div class="modal-card">
+								<header class="modal-card-head">
+									<p class="modal-card-title">Modal title</p>
+									<button class="delete" aria-label="close"></button>
+								</header>
+								<section
+									class="modal-card-body"><!-- Content ... -->
+								</section>
+								<footer class="modal-card-foot">
+									<div class="buttons">
+										<button class="button is-success">Save changes</button>
+										<button class="button">Cancel</button>
+									</div>
+								</footer>
+							</div>
+						</div>
+
+
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+		<div>
+			<h2 class="my-4 fs-3">Ajouter une catégorie</h2>
+
+			{{ form_start(categoryForm) }}
+
+			{{ form_row(categoryForm.title) }}
+
+			{{ form_row(categoryForm.description) }}
+
+			<button type="submit" class="btn btn-dark">Enregistrer</button>
+
+			{{ form_end(categoryForm) }}
+		</div>
+	</div>
 {% endblock %}
