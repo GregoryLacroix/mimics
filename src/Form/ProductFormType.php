@@ -7,10 +7,12 @@ use App\Entity\Product;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ProductFormType extends AbstractType
@@ -58,11 +60,56 @@ class ProductFormType extends AbstractType
                     'Rose' => "rose"
                 ]
             ])
-            ->add('size')
-            ->add('gender')
-            ->add('picture')
-            ->add('stock')
-            ->add('price')
+            ->add('size', ChoiceType::class, [
+                'label' => "Mémoire",
+                'choices' => [
+                    '128g' => '128g',
+                    '256g' => '256g',
+                    '512g' => '512g'
+                ]
+            ])
+            ->add('gender', ChoiceType::class, [
+                'label' => "Genre",
+                'choices' => [
+                    'Homme' => 'homme',
+                    'Femme' => 'femme',
+                    'Mixte' => 'mixte'
+                ]
+            ])
+            ->add('picture', FileType::class, [
+                'label' => "Photo produit",
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '10M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/jpg',
+                        ],
+                        'mimeTypesMessage' => "Formats autorisés : jpg/jpeg/png"
+                    ])
+                ]
+            ])
+            ->add('stock', TextType::class, [
+                'label' => "Stock",
+                'required' => false,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => "Veuillez saisir un stock"
+                    ])
+                ]
+            ])
+            ->add('price', TextType::class, [
+                'label' => "Prix",
+                'required' => false,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => "Veuillez saisir un prix"
+                    ])
+                ]
+            ])
             ->add('category', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => 'title',

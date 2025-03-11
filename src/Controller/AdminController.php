@@ -3,13 +3,17 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Entity\Product;
 use App\Form\CategoryFormType;
+use App\Form\ProductFormType;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class AdminController extends AbstractController
 {
@@ -20,9 +24,68 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/admin/products', name: 'app_admin_products')]
-    public function adminProducts(): Response
+    #[Route('/admin/products/update/{id}', name: 'app_admin_products_update')]
+    public function adminProducts(?Product $product, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-        return $this->render('admin/products.html.twig', []);
+        // ?Product $product : le ? veut dire que par défault $product a une valeur null
+        // dump($product);
+
+        if (!$product)
+            $product = new Product;
+
+        $form = $this->createForm(ProductFormType::class, $product);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $pictureFile = $form->get('picture')->getData();
+            // dump($pictureFile);
+
+            if ($pictureFile) {
+                // retoutrne le nom du fichier d'origine  (sans l'extension)
+                $originalFileName = pathinfo($pictureFile->getClientOriginalName(), PATHINFO_FILENAME);
+                // dump($originalFileName);
+
+                // slug() sécurise le nom du fichier  (suppression espace etc...)
+                $safeFileName = $slugger->slug($originalFileName);
+                // dump($safeFileName);
+
+                // On renomme l'image
+                //                  p2-4457842511.png
+                $newFileName = $safeFileName . '-' . uniqid() . '.' . $pictureFile->guessExtension();
+                // dump($newFileName);
+                // dump($this->getParameter('image_directory'));
+                $currentPath = $this->getParameter('image_directory');
+
+                try {
+                    $pictureFile->move($currentPath, $newFileName);
+                } catch (FileException $e) {
+                    // dump($e->getMessage());
+                }
+
+                $product->setPicture($newFileName);
+                dump($product);
+            }
+
+            $product->setCreatedAt(new \DateTimeImmutable());
+            $entityManager->persist($product);
+            $entityManager->flush();
+
+            $this->addFlash('success', "L'article a été enregistré.");
+
+            return $this->redirectToRoute('app_admin_products');
+        }
+
+        // $repoProduct : objet issu de la class ProductRepository
+        $repoProduct = $entityManager->getRepository(Product::class);
+        $dbProduct = $repoProduct->findAll();
+        // dump($dbProduct);
+
+        return $this->render('admin/products.html.twig', [
+            'productForm' => $form,
+            'dbProduct' => $dbProduct,
+            'pictureFile' => $product->getPicture()
+        ]);
     }
 
     #[Route('/admin/category', name: 'app_admin_category')]
