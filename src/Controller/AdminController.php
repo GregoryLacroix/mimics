@@ -33,8 +33,10 @@ final class AdminController extends AbstractController
         $form = $this->createForm(CategoryFormType::class, $category);
 
         // $category->setTitle($_POST['title']);
+        // $category->setTitle($_POST['descritpion']);
         $form->handleRequest($request);
 
+        // if(isset($_POST['submit']) && $_SERVER['REQUEST_METHOD'] === 'POST')
         if ($form->isSubmitted() && $form->isValid()) {
 
             $category->setCreatedAt(new \DateTimeImmutable());
@@ -47,6 +49,8 @@ final class AdminController extends AbstractController
             $entityManager->flush();
 
             // Message utilisateur stockés en session
+            // $_SESSION['msgValidate'] = "La catégorie a été enregistrée."
+            // $_SESSION['success'] = "La catégorie a été enregistrée."
             $this->addFlash('success', "La catégorie a été enregistrée.");
 
             return $this->redirectToRoute('app_admin_category');
@@ -67,6 +71,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
+    //                              1
     #[Route('/admin/category/update/{id}', name: 'app_admin_category_update')]
     public function adminCategoryUpdate($id, Category $category, Request $request, EntityManagerInterface $entityManager, CategoryRepository $repoCategory): Response
     {
@@ -106,8 +111,20 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/admin/category/remove/{id}', name: 'app_admin_category_remove')]
-    public function adminCategoryRemove($id, EntityManagerInterface $entityManager, CategoryRepository $repoCategory) {
-        
+    public function adminCategoryRemove($id, EntityManagerInterface $entityManager, CategoryRepository $repoCategory)
+    {
+        $category = $repoCategory->find($id);
+        dump($category);
+
+        // $categoryTitle =
+
+        // DELETE FROM category WHERE id = $id
+        $entityManager->remove($category);
+        $entityManager->flush();
+
+        $this->addFlash('success', "La catégorie a été supprimée.");
+
+        return $this->redirectToRoute('app_admin_category');
     }
 
 

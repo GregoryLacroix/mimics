@@ -5,6 +5,12 @@
 {% endblock %}
 
 {% block body %}
+	<style>
+		.modal-backdrop {
+			z-index: 1 !important;
+		}
+	</style>
+
 	<div
 		class="container">
 		{#     success, OBJET MESSAGE  #}
@@ -42,50 +48,51 @@
 								<a href="{{ path('app_admin_category_update', {'id': item.id}) }}" class="btn btn-dark mb-2">
 									<i class="fa-solid fa-pen-to-square"></i>
 								</a>
-								<button class="btn btn-danger js-modal-trigger" data-target="modal-js-example--{{ item.id }}">
+								<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#category-{{ item.id }}">
 									<i class="fa-solid fa-trash"></i>
 								</button>
 							</td>
 						</tr>
 
-						<div id="modal-js-example-{{ item.id }}" class="modal">
-
-							<div class="modal-background"></div>
-							<div class="modal-card">
-								<header class="modal-card-head">
-									<p class="modal-card-title">Modal title</p>
-									<button class="delete" aria-label="close"></button>
-								</header>
-								<section
-									class="modal-card-body"><!-- Content ... -->
-								</section>
-								<footer class="modal-card-foot">
-									<div class="buttons">
-										<button class="button is-success">Save changes</button>
-										<button class="button">Cancel</button>
+						<div class="modal fade" id="category-{{ item.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation suppression</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 									</div>
-								</footer>
+									<div class="modal-body">
+										Voulez-vous réellement supprimer la catégorie
+										<strong>{{ item.title }}</strong>
+										?
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+
+										<a href="{{ path('app_admin_category_remove', {'id': item.id}) }}" class="btn btn-primary">Confirmer</a>
+									</div>
+								</div>
 							</div>
 						</div>
 
 
 					{% endfor %}
 				</tbody>
-			</table>
-		</div>
-
-		<div>
-			<h2 class="my-4 fs-3">Ajouter une catégorie</h2>
-
-			{{ form_start(categoryForm) }}
-
-			{{ form_row(categoryForm.title) }}
-
-			{{ form_row(categoryForm.description) }}
-
-			<button type="submit" class="btn btn-dark">Enregistrer</button>
-
-			{{ form_end(categoryForm) }}
-		</div>
+			</tbody>
+		</table>
 	</div>
-{% endblock %}
+
+	<div>
+		<h2 class="my-4 fs-3">Ajouter une catégorie</h2>
+
+		{{ form_start(categoryForm) }}
+
+		{{ form_row(categoryForm.title) }}
+
+		{{ form_row(categoryForm.description) }}
+
+		<button type="submit" class="btn btn-dark">Enregistrer</button>
+
+		{{ form_end(categoryForm) }}
+	</div>
+</div>{% endblock %}
