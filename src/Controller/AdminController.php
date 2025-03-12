@@ -7,6 +7,7 @@ use App\Entity\Product;
 use App\Form\CategoryFormType;
 use App\Form\ProductFormType;
 use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -30,6 +31,11 @@ final class AdminController extends AbstractController
         // ?Product $product : le ? veut dire que par défault $product a une valeur null
         // dump($product);
 
+        // 1er route '/admin/products'
+        // Si la variable $product N'EST PAS (!), si elle renvoie false, cela veut dire qu'aucun id product n'est passé dans l'URL, alors on entre dans la condition, et on initialise un objet Entity $product, donc c'est une insertion de produit 
+
+        // 2ème route : '/admin/products/update/{id}'
+        // On envoi un id $product dans l'URL, Symfony comprend que l'on a besoin d'un objet entity product issu de la table SQL product, il est capable automatiquement d'aller sélectionner en BDD le produit et de l'envoyer en arguement de la fonction ?Product $product, à ce moment là, la variable $product contient les données du produit que l'on souhaite modifié, alors on ne rentre pas dans la condition pas dans la condition if
         if (!$product)
             $product = new Product;
 
@@ -64,14 +70,22 @@ final class AdminController extends AbstractController
                 }
 
                 $product->setPicture($newFileName);
-                dump($product);
+                // dump($product);
+            }
+
+            // Si la condition retourne TRUE, cela veut dire que l'id est connu en BDD, c'est une modification
+            if ($product->getId()) {
+                $messageValidate = "Les modifications ont été enregistrées.";
+            } else {
+                // Sinon dans tout les autres cas, c'est une insertion
+                $messageValidate = "L'article été enregistré.";
             }
 
             $product->setCreatedAt(new \DateTimeImmutable());
             $entityManager->persist($product);
             $entityManager->flush();
 
-            $this->addFlash('success', "L'article a été enregistré.");
+            $this->addFlash('success', $messageValidate);
 
             return $this->redirectToRoute('app_admin_products');
         }
@@ -86,6 +100,23 @@ final class AdminController extends AbstractController
             'dbProduct' => $dbProduct,
             'pictureFile' => $product->getPicture()
         ]);
+    }
+
+    #[Route('/admin/products/remove/{id}', name: 'app_admin_products_remove')]
+    public function adminRemoveProduct($id, ProductRepository $repoProduct, EntityManagerInterface $entityManager)
+    {
+        // SELECT * FROM product WHERE id = $id
+        $product = $repoProduct->find($id);
+        // dump($product);
+
+        // DELETE FROM product WHERE id = 9
+        $entityManager->remove($product);
+        // execute();
+        $entityManager->flush();
+
+        $this->addFlash('success', "L'article a été supprimé.");
+
+        return $this->redirectToRoute('app_admin_products');
     }
 
     #[Route('/admin/category', name: 'app_admin_category')]
@@ -177,15 +208,17 @@ final class AdminController extends AbstractController
     public function adminCategoryRemove($id, EntityManagerInterface $entityManager, CategoryRepository $repoCategory)
     {
         $category = $repoCategory->find($id);
-        dump($category);
+        // dump($category->getProducts()->isEmpty());
 
-        // $categoryTitle =
+        if ($category->getProducts()->isEmpty()) {
+            // DELETE FROM category WHERE id = $id
+            $entityManager->remove($category);
+            $entityManager->flush();
 
-        // DELETE FROM category WHERE id = $id
-        $entityManager->remove($category);
-        $entityManager->flush();
-
-        $this->addFlash('success', "La catégorie a été supprimée.");
+            $this->addFlash('success', "La catégorie a été supprimée.");
+        } else {
+            $this->addFlash('danger', "Impossible de supprimer la catégorie, des articles y sont associés.");
+        }
 
         return $this->redirectToRoute('app_admin_category');
     }

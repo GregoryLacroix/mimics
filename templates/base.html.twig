@@ -14,6 +14,8 @@
 		<meta name="description" content=""/>
 		<meta name="author" content=""/>
 
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
 		<title>
 			{% block title %}Mimics
 			{% endblock %}
@@ -77,22 +79,20 @@
 										</a>
 									{% endif %}
 
-
-									<a href="" class="cart-link">
+									<a href="{{ path('app_cart') }}" class="cart-link">
 										<i class="fa fa-shopping-cart" aria-hidden="true"></i>
 										<span>
-											Cart
+											PANIER
 										</span>
 									</a>
 								</div>
 							</div>
-
 						</div>
 					</div>
 					<div class="header_bottom">
 						<div class="container-fluid">
 							<nav class="navbar navbar-expand-lg custom_nav-container ">
-								<a class="navbar-brand" href="index.html">
+								<a class="navbar-brand" href="{{ path('app_home') }}">
 									<span>
 										Minics
 									</span>
