@@ -10,6 +10,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,7 +30,7 @@ final class AdminController extends AbstractController
     public function adminProducts(?Product $product, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         // ?Product $product : le ? veut dire que par défault $product a une valeur null
-        // dump($product);
+        // dump($this->getParameter('image_directory'));
 
         // 1er route '/admin/products'
         // Si la variable $product N'EST PAS (!), si elle renvoie false, cela veut dire qu'aucun id product n'est passé dans l'URL, alors on entre dans la condition, et on initialise un objet Entity $product, donc c'est une insertion de produit 
@@ -108,6 +109,9 @@ final class AdminController extends AbstractController
         // SELECT * FROM product WHERE id = $id
         $product = $repoProduct->find($id);
         // dump($product);
+        $filesystem = new Filesystem();
+        $currentPath = $this->getParameter('image_directory') . '/' . $product->getPicture();
+        $filesystem->remove(['symlink', $currentPath, $product->getPicture()]);
 
         // DELETE FROM product WHERE id = 9
         $entityManager->remove($product);

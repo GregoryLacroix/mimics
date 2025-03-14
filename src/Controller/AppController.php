@@ -21,7 +21,7 @@ final class AppController extends AbstractController
             5. Séléctionner en BDD le produit 
             6. Afficher les informations du produit (titre, référence, image etc...)
         */
-        $dbProduct = $repoProduct->findAll();
+        $dbProduct = $repoProduct->getMaxProducts();
         dump($dbProduct);
 
         return $this->render('app/index.html.twig', [
